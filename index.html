@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <script type="text/javascript" src="js/plugin.js"></script>
+    <script type="text/javascript" src="js/html2canvas.min.js"></script>
+    <script>
+
+        function saveItem() {
+            html2canvas(getPicsDiv())
+                .then(canvas => {
+                    return canvas.toDataURL("image/png");
+                })
+                .then(base64 => {
+                    eagle.window.hide();
+                    clearAll();
+                    console.log("clear container");
+                    return eagle.item.addFromBase64(base64, getItemInfo("input-panel"))
+                })
+        }
+
+    </script>
+</head>
+<style>
+    .img-wrap {
+        display: block;
+        margin: 0 auto;
+        border-color: red;
+        max-width: 100%;
+        height: auto;
+        margin-left: 0;
+        padding: 2%;
+    }
+
+    #pictures {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 90%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 3px;
+        background-color: white;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    #input-panel {
+        width: 90%;
+        padding: 20px;
+        background-color: #f8f8f8;
+        border-radius: 5px;
+    }
+
+    #input-panel label {
+        font-weight: bold;
+        color: #333;
+    }
+
+    #input-panel input {
+        width: 90%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 3px;
+        border: 1px solid #ccc;
+    }
+
+    #input-panel button {
+        width: 90%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 3px;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    #input-panel button:hover {
+        background-color: #0056b3;
+    }
+
+    #footer {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .footer-item {
+        display: flex;
+        align-items: center;
+    }
+
+    .footer-item img {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+    }
+</style>
+
+<body>
+    <div id="input-panel">
+        <div id="pictures"></div>
+        <input type="text" name="name" placeholder="文件名"><br>
+        <input type="text" name="annotation" placeholder="添加注释"><br>
+        <input type="text" name="website" placeholder="http://"><br>
+        <input type="text" name="tags" placeholder="标签之间用','分割"><br>
+        <!-- <input type="text" name="folders"><br>  -->
+        <button onclick="shotAndRead()">截图</button>
+        <button onclick="saveItem()">保存</button>
+        <button onclick="windowHide()">关闭</button>
+        <button onclick="clearAll()">清理</button>
+        <div id="footer">
+            <div class="footer-item">
+                <img src="github.png" alt="GitHub">
+                <a href="https://github.com/yourusername" target="_blank">GitHub</a>
+            </div>
+            <div class="footer-item">
+                <img src="email.png" alt="Email">
+                <a href="mailto:your-email@example.com" target="_blank">moshenwuji@live.com</a>
+            </div>
+            <div class="footer-item">
+                <img src="logo.png" alt="Info">
+                <a href="plugin-info.html" target="_blank">clipboard 1.00</a>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+</html>
