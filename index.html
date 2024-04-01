@@ -9,7 +9,23 @@
     <script>
 
         function saveItem() {
-            html2canvas(getPicsDiv())
+
+            const div = getPicsDiv()
+
+            // document.getElementById('pictures').scrollHeight
+            const fullPageHeight = document.documentElement.scrollHeight;
+            const fullPageWeight = document.documentElement.scrollWidth;
+            const height = div.scrollHeight;
+            const width = div.scrollWidth+ 20; 
+            // 创建一个虚拟的 canvas 元素，用于绘制完整页面
+            const canvas = document.createElement("canvas");
+            canvas.width = width; // 设置 canvas 宽度为当前窗口宽度
+            canvas.height = height; // 设置 canvas 高度为整个页面高度
+
+            // 获取整个页面的内容
+            // const fullPageContext = fullPageCanvas.getContext("2d");
+
+            html2canvas(div, canvas)
                 .then(canvas => {
                     return canvas.toDataURL("image/png");
                 })
@@ -22,83 +38,8 @@
         }
 
     </script>
+    <link rel="stylesheet" href="index.css">
 </head>
-<style>
-    .img-wrap {
-        display: block;
-        margin: 0 auto;
-        border-color: red;
-        max-width: 100%;
-        height: auto;
-        margin-left: 0;
-        padding: 2%;
-    }
-
-    #pictures {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        width: 90%;
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 3px;
-        background-color: white;
-        color: white;
-        border: none;
-        cursor: pointer;
-    }
-
-    #input-panel {
-        width: 90%;
-        padding: 20px;
-        background-color: #f8f8f8;
-        border-radius: 5px;
-    }
-
-    #input-panel label {
-        font-weight: bold;
-        color: #333;
-    }
-
-    #input-panel input {
-        width: 90%;
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 3px;
-        border: 1px solid #ccc;
-    }
-
-    #input-panel button {
-        width: 90%;
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 3px;
-        background-color: #007BFF;
-        color: white;
-        border: none;
-        cursor: pointer;
-    }
-
-    #input-panel button:hover {
-        background-color: #0056b3;
-    }
-
-    #footer {
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .footer-item {
-        display: flex;
-        align-items: center;
-    }
-
-    .footer-item img {
-        width: 20px;
-        height: 20px;
-        margin-right: 10px;
-    }
-</style>
 
 <body>
     <div id="input-panel">
@@ -112,7 +53,7 @@
         <button onclick="saveItem()">保存</button>
         <button onclick="windowHide()">关闭</button>
         <button onclick="clearAll()">清理</button>
-        <div id="footer">
+        <!-- <div id="footer">
             <div class="footer-item">
                 <img src="github.png" alt="GitHub">
                 <a href="https://github.com/eterk" target="_blank">GitHub</a>
@@ -125,7 +66,7 @@
                 <img src="logo.png" alt="Info">
                 <a href="https://github.com/eterk/clipboard" target="_blank">clipboard 1.00</a>
             </div>
-        </div>
+        </div> -->
     </div>
 
 

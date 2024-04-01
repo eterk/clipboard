@@ -128,6 +128,7 @@ function displayPic(imgObj, picsDiv) {
 	// 创建删除选项
 	let deleteOption = document.createElement('div');
 	deleteOption.textContent = '删除';
+	
 	deleteOption.onclick = function () {
 		wrap.remove();
 	};

@@ -3,9 +3,9 @@
     "version": "1.0.0",
     "platform": "all",
     "arch": "all",
-    "name": "clipboarda",
+    "name": "clipboard",
     "logo": "/logo.png",
-    "keywords": [],
+    "keywords": ["剪贴板","笔记","clipboard","生产力"],
     "devTools": false,
     "main": {
         "serviceMode": true,

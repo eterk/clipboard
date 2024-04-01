@@ -33,10 +33,6 @@ Eagle 剪贴板插件是一个强大的工具，旨在增强您的笔记记录�
 
 欢迎 fork 项目，提出问题，或提交 pull 请求。对于重大变更，请先开启一个问题进行讨论。
 
-## 许可
-
-该项目在 MIT 许可下授权。详情请查看 LICENSE 文件。
-
 ## 联系
 
 如有任何问题，欢迎通过 moshenwuji@live.com 联系开发者，或访问 [GitHub](https://github.com/eterk) 页面。
