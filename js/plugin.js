@@ -46,20 +46,30 @@ function getScreenShot() {
 	});
 }
 
-
-function getItemInfo(id) {
-
-	let proto = {
-		name: "ScreenShot" + new Date().getTime(),
-		website: '',
-		tags: ["ScreenShot"],
-		folders: [],
-		annotation: '',
-	};
-
+function getInputElements(id) {
 	let inputPanel = document.getElementById(id);
 
-	let inputs = inputPanel.getElementsByTagName('input');
+
+	return inputPanel.getElementsByTagName('input');
+}
+function getInputItemInfo() {
+	let inputs = getInputElements("input-panel")
+	return getItemInfo(inputs, defaultInfo)
+}
+
+/**
+ * default proto  for pic label
+ */
+let defaultInfo = {
+	name: "ScreenShot" + new Date().getTime(),
+	website: '',
+	tags: ["ScreenShot"],
+	folders: [],
+	annotation: '',
+};
+
+
+function getItemInfo(inputs, proto) {
 
 	let item = {};
 
@@ -102,6 +112,17 @@ function shotAndRead() {
 }
 
 function clearAll() {
+	clearLabel()
+	clearPic()
+}
+function clearLabel() {
+	let inputs = getInputElements("input-panel")
+	eagle.log.info(`call clearLabel`);
+	for (let i = 0; i < inputs.length; i++) {
+		inputs[i].value = '';
+	}
+}
+function clearPic(){
 	let picsDiv = getPicsDiv()
 	container = [];
 	picsDiv.innerHTML = ""
@@ -128,7 +149,7 @@ function displayPic(imgObj, picsDiv) {
 	// 创建删除选项
 	let deleteOption = document.createElement('div');
 	deleteOption.textContent = '删除';
-	
+
 	deleteOption.onclick = function () {
 		wrap.remove();
 	};

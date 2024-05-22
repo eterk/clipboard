@@ -7,23 +7,29 @@
     <script type="text/javascript" src="js/plugin.js"></script>
     <script type="text/javascript" src="js/html2canvas.min.js"></script>
     <script>
+        function originSize() {
+            const div = getPicsDiv()
+
+            const fullPageHeight = document.documentElement.scrollHeight;
+            const fullPageWeight = document.documentElement.scrollWidth;
+            const height = div.scrollHeight+10;
+            const width = div.scrollWidth +20;
+            let sizeInfo={}
+            sizeInfo.height=height
+            sizeInfo.width=width
+            return sizeInfo
+        }
 
         function saveItem() {
 
-            const div = getPicsDiv()
-
-            // document.getElementById('pictures').scrollHeight
-            const fullPageHeight = document.documentElement.scrollHeight;
-            const fullPageWeight = document.documentElement.scrollWidth;
-            const height = div.scrollHeight;
-            const width = div.scrollWidth+ 20; 
+            let size=originSize()
             // 创建一个虚拟的 canvas 元素，用于绘制完整页面
             const canvas = document.createElement("canvas");
-            canvas.width = width; // 设置 canvas 宽度为当前窗口宽度
-            canvas.height = height; // 设置 canvas 高度为整个页面高度
-
-            // 获取整个页面的内容
-            // const fullPageContext = fullPageCanvas.getContext("2d");
+            canvas.width = size.width; // 设置 canvas 宽度为当前窗口宽度
+            canvas.height = size.height; // 设置 canvas 高度为整个页面高度
+        
+            const div = getPicsDiv()
+            if(div.childNodes.length!=0){
 
             html2canvas(div, canvas)
                 .then(canvas => {
@@ -33,8 +39,12 @@
                     eagle.window.hide();
                     clearAll();
                     console.log("clear container");
-                    return eagle.item.addFromBase64(base64, getItemInfo("input-panel"))
+                    return eagle.item.addFromBase64(base64, getInputItemInfo())
                 })
+            }
+
+
+
         }
 
     </script>
@@ -48,25 +58,10 @@
         <input type="text" name="annotation" placeholder="添加注释"><br>
         <input type="text" name="website" placeholder="http://"><br>
         <input type="text" name="tags" placeholder="标签之间用','分割"><br>
-        <!-- <input type="text" name="folders"><br>  -->
         <button onclick="shotAndRead()">截图</button>
         <button onclick="saveItem()">保存</button>
         <button onclick="windowHide()">关闭</button>
         <button onclick="clearAll()">清理</button>
-        <!-- <div id="footer">
-            <div class="footer-item">
-                <img src="github.png" alt="GitHub">
-                <a href="https://github.com/eterk" target="_blank">GitHub</a>
-            </div>
-            <div class="footer-item">
-                <img src="email.png" alt="Email">
-                <a href="mailto:your-email@example.com" target="_blank">moshenwuji@live.com</a>
-            </div>
-            <div class="footer-item">
-                <img src="logo.png" alt="Info">
-                <a href="https://github.com/eterk/clipboard" target="_blank">clipboard 1.00</a>
-            </div>
-        </div> -->
     </div>
 
 

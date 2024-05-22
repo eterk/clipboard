@@ -29,11 +29,6 @@
     border-radius: 5px;
 }
 
-#input-panel label {
-    font-weight: bold;
-    color: #333;
-}
-
 #input-panel input {
     width: 90%;
     padding: 10px;
