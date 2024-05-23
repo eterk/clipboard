@@ -8,6 +8,12 @@
     padding: 2%;
 }
 
+.img-wrap img {
+    object-fit: contain;
+    /* 设置 img 的内容应按比例缩放以适应内容框 */
+}
+
+
 #pictures {
     display: flex;
     flex-direction: column;
@@ -42,14 +48,25 @@
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 3px;
-    background-color: #007BFF;
-    color: white;
+    color: gainsboro;
     border: none;
     cursor: pointer;
 }
 
-#input-panel button:hover {
-    background-color: #0056b3;
+[name='red'] {
+    background-color: #ff4466;
+}
+
+[name='red']:hover {
+    background-color: #f44336;
+}
+
+[name='blue'] {
+    background-color: #3c9aff;
+}
+
+[name='blue']:hover {
+    background-color: #007BFF;
 }
 
 #footer {

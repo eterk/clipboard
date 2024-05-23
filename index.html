@@ -7,44 +7,39 @@
     <script type="text/javascript" src="js/plugin.js"></script>
     <script type="text/javascript" src="js/html2canvas.min.js"></script>
     <script>
-        function originSize() {
-            const div = getPicsDiv()
 
-            const fullPageHeight = document.documentElement.scrollHeight;
-            const fullPageWeight = document.documentElement.scrollWidth;
-            const height = div.scrollHeight+10;
-            const width = div.scrollWidth +20;
-            let sizeInfo={}
-            sizeInfo.height=height
-            sizeInfo.width=width
-            return sizeInfo
-        }
-
-        function saveItem() {
-
-            let size=originSize()
+        async function toCanvas() {
+            let size = originSize()
             // 创建一个虚拟的 canvas 元素，用于绘制完整页面
             const canvas = document.createElement("canvas");
             canvas.width = size.width; // 设置 canvas 宽度为当前窗口宽度
             canvas.height = size.height; // 设置 canvas 高度为整个页面高度
-        
+
             const div = getPicsDiv()
-            if(div.childNodes.length!=0){
+            canvasResult = await html2canvas(div, canvas)
+            const base64 = canvasResult.toDataURL("image/png");
+            const res = await eagle.item.addFromBase64(base64, getInputItemInfo());
 
-            html2canvas(div, canvas)
-                .then(canvas => {
-                    return canvas.toDataURL("image/png");
-                })
-                .then(base64 => {
-                    eagle.window.hide();
-                    clearAll();
-                    console.log("clear container");
-                    return eagle.item.addFromBase64(base64, getInputItemInfo())
-                })
+            clearAll();
+
+        }
+        function saveItem() {
+            let havePic = !picturesEmpty();
+
+            if (havePic) {
+                let state = container.state();
+                if (!state.isReady) {
+                    eagle.dialog.showMessageBox({
+                        title: "Messagebox title",
+                        message: state.msg,
+                        detail: "Ultra message here",
+                        buttons: ["OK", "Cancel"],
+                        type: "info"
+                    });
+                } else {
+                    toCanvas();
+                }
             }
-
-
-
         }
 
     </script>
@@ -58,10 +53,12 @@
         <input type="text" name="annotation" placeholder="添加注释"><br>
         <input type="text" name="website" placeholder="http://"><br>
         <input type="text" name="tags" placeholder="标签之间用','分割"><br>
-        <button onclick="shotAndRead()">截图</button>
-        <button onclick="saveItem()">保存</button>
-        <button onclick="windowHide()">关闭</button>
-        <button onclick="clearAll()">清理</button>
+        <button onclick="shotAndRead()" name="blue" id="shot">截图</button>
+        <button onclick="saveItem()" name="blue" class="need-pic">保存</button>
+        <button onclick="logState()" name="blue" id="log">log</button>
+        <button onclick="mergeItems()" name="blue" class="need-select">合并</button>
+        <button onclick="clearAll()" name="red" class="need-pic">清理</button>
+        <button onclick="windowHide()" name="red" id="close">关闭</button>
     </div>
 
 
