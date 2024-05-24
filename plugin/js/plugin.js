@@ -19,18 +19,18 @@ function getPicsDiv() {
  */
 function defaultLabel() {
 	let texts = container.concatText()
+	let tags = container.collectTags();
 
 	let label = {
 		name: "ScreenShot" + new Date().getTime(),
 		website: '',
-		tags: ["ScreenShot"],
+		tags: tags,
 		folders: [],
 		annotation: texts,
 	};
 	return label
 
 }
-
 
 let eagle_home = path.dirname(eagle.app['execPath'])
 
@@ -39,15 +39,88 @@ let capture = `${eagle_home}\\NiuniuCapture.exe`;
 /**********************************************
  *                  container                 *
  **********************************************/
+class ContextElement {
+
+	constructor(image) {
+		this.context = image;
+		this.contextType = typeof image === "string" ? 'base64Image' : 'nativeImage';
+		this.tags = [];
+		this.name = "pic_" + new Date().getTime();
+		this.text = "";
+		this.state = 0;
+		this.src = "";
+		this.html = "";
+	}
+
+	compelete() {
+		this.updateSrc();
+		this.updateState();
+		this.updateHtml();
+		return this;
+	}
+
+	updateLabel(name, tags, text) {
+		this.name = name;
+		this.tags = tags;
+		this.text = text;
+		return this;
+	}
+
+	updateSrc() {
+		switch (this.contextType) {
+			case 'base64Image':
+				this.src = "data:image/png;base64," + this.context;
+				break;
+			case 'nativeImage':
+				this.src = this.context.toDataURL();
+				break;
+			default:
+				break;
+		}
+	}
+	updateState() {
+		switch (this.contextType) {
+			case 'nativeImage':
+				resloveText(this.context.toPNG({}))
+					.then(txt => {
+						this.text = removeExtraSpaces(txt);
+						this.state = 1;
+					})
+				break;
+			default:
+				this.state = 1;
+				break;
+		}
+
+	}
+	updateHtml() {
+		let wrap = document.createElement("div");
+		wrap.className = 'img-wrap'
+		let img = document.createElement('img');
+		img.src = this.src;
+		img.id = this.name;
+		img.className = 'cap-img';
+
+		wrap.appendChild(img)
+		this.html = wrap
+	}
+
+}
+
 class Container {
+
 	constructor() {
 		this.seq = [];
 	}
+
 	length() {
 		return this.seq.length
 	}
+	collectTags() {
+		return [...new Set(this.seq.flatMap(item => item.tags))]
+	}
 	concatText() {
-		return this.seq.map(item => removeExtraSpaces(item.text)).join('\n');
+		return this.seq.map(item => item.text).join('\n');
 	}
 
 	isReady() {
@@ -63,29 +136,11 @@ class Container {
 			size: this.length()
 		}
 	}
-	push(image) {
-		let obj = {
-			img: image,
-			name: "pic_" + new Date().getTime(),
-			text: "",
-			state: 0
-		}
-		let img = document.createElement('img');
-		if (typeof image === "string") {
-			img.src = "data:image/png;base64," + image
-			obj.state = 1;
-		} else {
-			// if (typeof image === "NativeImage") 
-			resloveText(image.toPNG({})).then(txt => {
-				obj.text = txt;
-				obj.state = 1;
-			})
 
-			img.src = obj.img.toDataURL();
-		}
-		obj.html = imgObjToElement(obj.name, img)
-		this.seq.push(obj)
-		getPicsDiv().appendChild(obj.html)
+	push(context) {
+		this.seq.push(context);
+		getPicsDiv().appendChild(context.html)
+
 	}
 
 	removeByName(name) {
@@ -99,7 +154,7 @@ let container = new Container();
  *                  state                     *
  **********************************************/
 function resloveText(buffer) {
-	if (ocrSwitch) {
+	if (switchDict['ocrSwitch']) {
 		return recognizeTextFromBuffer(buffer);
 	} else {
 		return new Promise((resolve, reject) => {
@@ -108,21 +163,35 @@ function resloveText(buffer) {
 	}
 }
 
-let initMark = true;
+let scaleSize = 1;
+let switchDict = {
+	"prodMode": true,
+	"clearAfterSave": true,
+	"ocrSwitch": true,
+	"initMark": true
+}
 
-let ocrSwitch = true;
+function pushSwitch(id) {
+	switchDict[id] = !switchDict[id]
 
-const logState = () => {
-	let state = container.state();
-	state.init = initMark;
-	state.ocrSwitch = ocrSwitch;
-	state.picEmpty = picturesEmpty();
+	let value = switchDict[id]
 
-	selectEmpty()
-		.then(empty => {
-			state.selectEmpty = empty;
-			console.log(state);
-		})
+	let element = document.getElementById(id)
+
+	element.style.backgroundColor = value ? '#4CAF50' : '#F44336'
+
+	element.innerText = value ? '开启' : '关闭'
+}
+
+const logState = async () => {
+
+	state = {
+		...container.state(),
+		...switchDict,
+		picEmpty: picturesEmpty(),
+		selectEmpty: await selectEmpty()
+	};
+	console.log(state);
 }
 
 function picturesEmpty() {
@@ -137,49 +206,66 @@ async function getSelectItems() {
 	return await eagle.item.getSelected();
 }
 
+
+function updateWindowSize() {
+	const pictures = getPicsDiv()
+
+	const bodyWrap = document.getElementById('body-wrap');
+
+	let picSize = (pictures.offsetHeight * scaleSize)
+
+	bodyWrap.style.height = Math.max(picSize + 120, 500) + 'px';
+}
+function getPicSize() {
+	const pictures = getPicsDiv()
+
+	return {
+		height: pictures.offsetHeight * scaleSize,
+		width: pictures.offsetWidth * scaleSize
+	}
+}
 /**
  * 当没有图片的时候不显示保存和清理按钮,否则显示
  */
 function buttonUpdate() {
-	updateNeedPicButton()
-	updateNeedSelectButton()
+	hiddenClassElement('need-pic', picturesEmpty());
+	updateWindowSize();
+	// todo  暂时关闭以下按钮,没开发好逻辑,尚有欠缺
+	// selectEmpty()
+	// 	.then(hidden => hiddenClassElement('need-select', hidden))
 
-}
-function updateNeedPicButton() {
-	let hidden = picturesEmpty()
-	// 获取 class 为 a 的所有元素
-	var elements = document.getElementsByClassName('need-pic');
-
-	// 遍历所有元素，将它们设置为不可见
-	for (var i = 0; i < elements.length; i++) {
-		elements[i].hidden = hidden;
-	}
-}
-function updateNeedSelectButton() {
-	selectEmpty()
-		.then(hidden => {
-			// 获取 class 为 a 的所有元素
-			var elements = document.getElementsByClassName('need-select');
-			// 遍历所有元素，将它们设置为不可见
-			for (var i = 0; i < elements.length; i++) {
-				elements[i].hidden = hidden;
-			} ``
-		})
 }
 
 async function readBase64Image(filePath) {
 	let imageBuffer = fs.readFileSync(filePath);
 	return Buffer.from(imageBuffer).toString('base64');
 }
-async function readImages(filePaths) {
-	return await Promise.all(filePaths.map(p => readBase64Image(p)));
+function labeledImageToContextEle(obj) {
+	return new ContextElement(obj.img)
+		.updateLabel(obj.name, obj.tags, obj.annotation)
+		.compelete();
 }
-async function pushImages(images) {
-	return await Promise.all(images.map(img => container.push(img)));
+async function getLabeledImages(items) {
+	let arr = await Promise.all(items.map(async item => {
+		return {
+			id: item.id,
+			name:item.id,
+			path: item.filePath,
+			annotation: item.annotation,
+			tags: item.tags,
+			img: await readBase64Image(item.filePath)
+		};
+	}));
+
+	return arr;
 }
+
+
+
 
 function getInputItemInfo() {
 	let inputs = getInputElements("input-panel", 'input')
+
 	return mixProtoAndInput(inputs, defaultLabel())
 }
 function clearAll() {
@@ -221,6 +307,9 @@ function getCurrentDiplay() {
 
 
 
+async function getScreenShot11() {
+	return await eagle.window.capturePage();
+}
 function getScreenShot() {
 	return new Promise((resolve, reject) => {
 		eagle.log.info(`call ${capture}`);
@@ -231,6 +320,7 @@ function getScreenShot() {
 			resolve(eagle.clipboard.readImage());
 		});
 	});
+
 }
 
 /**********************************************
@@ -241,7 +331,15 @@ function getInputElements(id, tagName) {
 
 	return inputPanel.getElementsByTagName(tagName);
 }
+function hiddenClassElement(className, hidden) {
+	// 获取 class 为 a 的所有元素
+	var elements = document.getElementsByClassName(className);
+	// 遍历所有元素，将它们设置为不可见
+	for (var i = 0; i < elements.length; i++) {
+		elements[i].hidden = hidden;
+	}
 
+}
 // 将OCR操作封装成一个函数
 async function recognizeTextFromBuffer(buffer) {
 	const worker = await createWorker(['eng', 'chi_sim'])
@@ -279,7 +377,7 @@ function mixProtoAndInput(inputs, proto) {
 		let inputName = inputs[i].name;
 		let inputValue = inputs[i].value;
 
-		if (inputValue === '') {
+		if (inputValue === '' | inputValue.isEmpty) {
 			item[inputName] = proto[inputName];
 		} else {
 			if (inputName === 'tags' || inputName === 'folders') {
@@ -300,125 +398,54 @@ function shotAndRead() {
 		.then(window => {
 			return getScreenShot()
 		})
-		.then(image => {
-			container.push(image);
-		})
 		.catch(error => {
 			console.error(`调用 Eagle 截图功能时出错：${error.message}`);
 		})
-		.then(any => {
-			buttonUpdate()
+		.then(image => {
+			if (!image.isEmpty()) {
+				let obj = new ContextElement(image)
+					.compelete()
+				container.push(obj);
+			}
+			return !image.isEmpty()
+		})
+		.then(show => {
+			if (show) {
+				buttonUpdate()
+			}
 			eagle.window.show()
 		})
 
 
 }
 function mergeItems() {
+	console.log("merge-item")
 	getSelectItems()
 		.then(items => {
-
-
-			//todo  有空处理以下 多图合并后的标签合并问题
-
-			// 然后，我们将所有项目的 tags 合并到一个数组中，并去重
-			let allTags = [...new Set(items.flatMap(item => item.tags))];
-			// 我们也将所有项目的 annotations 按照 "\n" 拼接
-			let allAnnotations = items.map(item => item.annotation).join('\n');
-			// 最后，我们获取所有项目的 id 和 path
-			let ids = items.map(item => item.id);
-			console.log('All Tags: ', allTags);
-			console.log('All Annotations: ', allAnnotations);
-			console.log('IDs: ', ids);
-
-
-			let paths = items.map(item => item.filePath);
-
-			readImages(paths)
+			getLabeledImages(items)
 				.then(imgs => {
-					pushImages(imgs)
+					imgs.forEach(img =>
+						container.push(labeledImageToContextEle(img)))
 				})
 				.then(any => {
 					buttonUpdate()
-					// eagle.window.show()
+					eagle.window.show()
 				})
 		})
 
-	console.log("merge-item")
-}
 
-
-function originSize() {
-	const div = getPicsDiv()
-
-	const fullPageHeight = document.documentElement.scrollHeight;
-	const fullPageWeight = document.documentElement.scrollWidth;
-	const height = div.scrollHeight + 10;
-	const width = div.scrollWidth + 20;
-	let sizeInfo = {}
-	sizeInfo.height = height
-	sizeInfo.width = width
-	return sizeInfo
-}
-// 测试函数
-function getText() {
-	console.log("getText")
-	let png = container.seq[1].toPNG({})  // 这个没改格式
-	recognizeTextFromBuffer(png)
-		.then(txt => console.log(txt))
-}
-
-
-
-
-function imgObjToElement(name, img) {
-	let wrap = document.createElement("div");
-	wrap.className = 'img-wrap'
-
-
-	img.id = name;
-	img.className = 'cap-img';
-
-	// 创建右键点击菜单
-	let contextMenu = document.createElement('div');
-	contextMenu.className = 'context-menu';
-	contextMenu.style.display = 'none';
-
-	// 创建删除选项
-	let deleteOption = document.createElement('div');
-	deleteOption.textContent = '删除';
-
-	deleteOption.onclick = function () {
-		wrap.remove();
-		container.removeByName(name);
-		console.log(container.length());
-	};
-
-
-	contextMenu.appendChild(deleteOption);
-
-	wrap.onmouseover = function (e) {
-		contextMenu.style.display = 'block';
-		contextMenu.style.left = e.pageX + 'px';
-		contextMenu.style.top = e.pageY + 'px';
-	};
-
-	wrap.onmouseout = function () {
-		contextMenu.style.display = 'none';
-	};
-
-	wrap.appendChild(img)
-	wrap.appendChild(contextMenu)
-	return wrap
 }
 
 eagle.onPluginCreate((plugin) => {
 	console.log('eagle.onPluginCreate');
+	hiddenClassElement("need-select", switchDict['prodMode']);
 	eagle.window.hide()
 });
 
 eagle.onPluginRun(() => {
-	if (initMark) {
-		initMark = false
+	// eagle.window.hide()
+	if (switchDict['initMark']) {
+		switchDict['initMark'] = false
 	} else {
 		selectEmpty()
 			.then(empty => {

@@ -6,62 +6,134 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <script type="text/javascript" src="js/plugin.js"></script>
     <script type="text/javascript" src="js/html2canvas.min.js"></script>
-    <script>
-
-        async function toCanvas() {
-            let size = originSize()
-            // 创建一个虚拟的 canvas 元素，用于绘制完整页面
-            const canvas = document.createElement("canvas");
-            canvas.width = size.width; // 设置 canvas 宽度为当前窗口宽度
-            canvas.height = size.height; // 设置 canvas 高度为整个页面高度
-
-            const div = getPicsDiv()
-            canvasResult = await html2canvas(div, canvas)
-            const base64 = canvasResult.toDataURL("image/png");
-            const res = await eagle.item.addFromBase64(base64, getInputItemInfo());
-
-            clearAll();
-
-        }
-        function saveItem() {
-            let havePic = !picturesEmpty();
-
-            if (havePic) {
-                let state = container.state();
-                if (!state.isReady) {
-                    eagle.dialog.showMessageBox({
-                        title: "Messagebox title",
-                        message: state.msg,
-                        detail: "Ultra message here",
-                        buttons: ["OK", "Cancel"],
-                        type: "info"
-                    });
-                } else {
-                    toCanvas();
-                }
-            }
-        }
-
-    </script>
     <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
-    <div id="input-panel">
-        <div id="pictures"></div>
-        <input type="text" name="name" placeholder="文件名"><br>
-        <input type="text" name="annotation" placeholder="添加注释"><br>
-        <input type="text" name="website" placeholder="http://"><br>
-        <input type="text" name="tags" placeholder="标签之间用','分割"><br>
-        <button onclick="shotAndRead()" name="blue" id="shot">截图</button>
-        <button onclick="saveItem()" name="blue" class="need-pic">保存</button>
-        <button onclick="logState()" name="blue" id="log-state">log</button>
-        <button onclick="mergeItems()" name="blue" class="need-select">合并</button>
-        <button onclick="clearAll()" name="red" class="need-pic">清理</button>
-        <button onclick="windowHide()" name="red" id="close">关闭</button>
+    <div id="wrap">
+
+        <div id="body-wrap">
+            <!-- 内部元素左右排列 input-panel 固定宽度,有一个折叠展开的出发按钮-->
+            <div id="side-menu">
+                <div id="status-bar">
+                    <div class="status-item">
+                        <div class="tags">OCR</div>
+                        <div class="status" onclick="pushSwitch('ocrSwitch')" id="ocrSwitch">开启</div>
+                    </div>
+                    <!-- <div class="status-item">
+                        <div class="tags">生产模式</div>
+                        <div class="status" onclick="pushSwitch('prodMode')" id="prodMode">开启</div>
+                    </div> -->
+                    <div class="status-item">
+                        <div class="tags">保存后清除</div>
+                        <div class="status" onclick="pushSwitch('clearAfterSave')" id="clearAfterSave">开启</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="tags">当前缩放比</div>
+                        <div class="status" id="sliderSize">1.0</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="tags">打印状态</div>
+                        <div class="status" onclick="logState()">确定</div>
+                    </div>
+                </div>
+                <div id="input-panel">
+                    <input type="range" min="0.1" max="2" value="1" step="0.1" id="slider">
+                    <input type="text" name="name" placeholder="文件名"><br>
+                    <input type="text" name="annotation" placeholder="添加注释"><br>
+                    <input type="text" name="website" placeholder="http://"><br>
+                    <input type="text" name="tags" placeholder="标签之间用','分割"><br>
+                    <button onclick="shotAndRead()" name="blue" id="shot">截图</button>
+                    <button onclick="saveItem()" id="save-button" name="blue" class="need-pic">保存</button>
+                    <button onclick="logState()" name="blue" class="need-select">log</button>
+                    <button onclick="mergeItems()" name="blue" class="need-select">合并</button>
+                    <button onclick="clearAll()" name="red" class="need-pic">清理</button>
+                    <button onclick="windowHide()" name="red" id="close">关闭</button>
+                </div>
+
+            </div>
+            <div id="preview-window">
+                <div id="pictures"></div>
+            </div>
+        </div>
     </div>
 
 
 </body>
+<script>
+    document.getElementById('pictures')
+        .addEventListener('dblclick', function (e) {
+            if (e.target.tagName === 'IMG') { // 检查事件的目标元素是否是img
+                container.removeByName(e.target.id);
+                e.target.remove();
+                buttonUpdate();
+            }
+        });
+
+
+    document.getElementById('slider').addEventListener('input', function (event) {
+        const pictures = getPicsDiv()
+        const inputPanel = document.getElementById('input-panel');
+        scaleSize = event.target.value;
+        document.getElementById('sliderSize').innerText = scaleSize;
+        pictures.style.transformOrigin = 'top left';
+        pictures.style.transform = `scale(${scaleSize})`;
+        updateWindowSize();
+    });
+
+    async function toCanvas() {
+        let size = getPicSize();
+        // 创建一个虚拟的 canvas 元素，用于绘制完整页面
+        const canvas = document.createElement("canvas");
+
+        const div = getPicsDiv();
+
+        canvas.width = size.width;
+
+        // size.width; // 设置 canvas 宽度为当前窗口宽度
+        canvas.height = size.height;
+        // size.height; // 设置 canvas 高度为整个页面高度
+
+        canvasResult = await html2canvas(div, canvas)
+        const base64 = canvasResult.toDataURL("image/png");
+        const res = await eagle.item.addFromBase64(base64, getInputItemInfo());
+
+        if (switchDict['clearAfterSave']) {
+            clearAll();
+        }
+
+    }
+
+    async function saveItem() {
+        let button = document.getElementById('save-button');
+        const color = button.style.backgroundColor;
+        button.style.backgroundColor = '#001BA1';
+        button.disabled = true;
+        await doSaveItem();
+        button.style.backgroundColor = color;
+        button.disabled = false;
+    }
+
+
+    async function doSaveItem() {
+        let havePic = !picturesEmpty();
+
+        if (havePic) {
+            let state = container.state();
+            if (!state.isReady) {
+                await eagle.dialog.showMessageBox({
+                    title: "绘聚-DrawGather",
+                    message: `绘聚正在完成文字识别任务:${state.msg}`,
+                    detail: "完成时间由图片上文字的多少等因素决定,请稍后重试",
+                    buttons: ["Ok"],
+                    type: "info"
+                });
+            } else {
+                await toCanvas();
+            }
+        }
+    }
+
+</script>
 
 </html>
