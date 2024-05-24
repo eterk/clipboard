@@ -9,7 +9,7 @@ const path = require('path');
 const { createWorker } = require('tesseract.js/dist/tesseract.min.js');
 const fs = require('fs');
 const { exec } = require('child_process');
-const { nativeImage } = require('electron');
+
 function getPicsDiv() {
 	return document.getElementById('pictures');
 }
@@ -34,7 +34,7 @@ function defaultLabel() {
 
 let eagle_home = path.dirname(eagle.app['execPath'])
 
-let capture = eagle_home + "\\NiuniuCapture.exe";
+let capture = `${eagle_home}\\NiuniuCapture.exe`;
 
 /**********************************************
  *                  container                 *
@@ -112,7 +112,7 @@ let initMark = true;
 
 let ocrSwitch = true;
 
-function logState() {
+const logState = () => {
 	let state = container.state();
 	state.init = initMark;
 	state.ocrSwitch = ocrSwitch;
@@ -314,7 +314,6 @@ function shotAndRead() {
 
 }
 function mergeItems() {
-	logState()
 	getSelectItems()
 		.then(items => {
 
@@ -344,7 +343,6 @@ function mergeItems() {
 				})
 		})
 
-	logState()
 	console.log("merge-item")
 }
 
@@ -419,7 +417,6 @@ eagle.onPluginCreate((plugin) => {
 });
 
 eagle.onPluginRun(() => {
-	logState()
 	if (initMark) {
 		initMark = false
 	} else {
@@ -433,7 +430,7 @@ eagle.onPluginRun(() => {
 			})
 
 	}
-	logState()
+
 	console.log('eagle.onPluginRun');
 });
 

@@ -3,9 +3,9 @@
     "version": "1.2.0",
     "platform": "all",
     "arch": "all",
-    "name": "clipboard",
+    "name": "图聚",
     "logo": "/logo.png",
-    "keywords": ["剪贴板","笔记","clipboard","生产力"],
+    "keywords": ["剪贴板","笔记","多图汇聚","生产力"],
     "devTools": false,
     "main": {
         "serviceMode": true,
