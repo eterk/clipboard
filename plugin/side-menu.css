@@ -1,0 +1,122 @@
+#status-bar {
+    padding: 10px;
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    /* background-color: #f2f2f2; */
+    /* 添加背景色 */
+    border-radius: 5px;
+    /* 添加圆角 */
+}
+
+.status-item {
+
+    display: flex;
+    flex-direction: column;
+    /* 添加此行使元素竖直排列 */
+    align-items: center;
+    /* 垂直居中对齐 */
+    justify-content: space-between;
+    /* 水平分布 */
+    width: 100%;
+    /* 设置宽度 */
+}
+
+.tags {
+    padding-bottom: 5px;
+    font-size: 12px;
+    color: #333;
+    /* 设置字体颜色 */
+    box-sizing: border-box;
+    /* 添加此行 */
+}
+
+.status {
+    width: 100%;
+    /* 添加此行使元素宽度填充其父元素 */
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+    /* 文本居中对齐 */
+}
+
+
+.status:hover {
+    background-color: #45a049;
+    /* 添加鼠标悬停效果 */
+}
+
+
+#side-menu {
+    background-color: #888888;
+    height: 30px;
+}
+
+.slider-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    /* justify-content: center;  */
+}
+
+.slider-label, .slider-input, .slider-value {
+    height: 100%;
+    font-size: 12px;
+    color: #333;
+}
+.slider-label {
+    flex-grow: 1; /* Add this line to allow the label to take up the remaining space */
+    padding-left: 5px;
+}
+.slider-value {
+    text-align: right;
+    padding-right: 5px;
+}
+
+#input-panel {
+    width: 240px;
+    height: auto;
+    padding: 10px,20px,20px,0px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    /* 添加这一行 */
+}
+
+
+#input-panel input {
+    width: 90%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+}
+
+#input-panel button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 3px;
+    color: gainsboro;
+    border: none;
+    cursor: pointer;
+}
+
+[name='red'] {
+    background-color: #ff4466;
+}
+
+[name='red']:hover {
+    background-color: #f44336;
+}
+
+[name='blue'] {
+    background-color: #3c9aff;
+}
+
+[name='blue']:hover {
+    background-color: #007BFF;
+}

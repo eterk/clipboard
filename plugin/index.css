@@ -1,61 +1,3 @@
-#status-bar {
-    padding: 10px;
-    height: 50px;
-    display: flex;
-    justify-content: space-between;
-    background-color: #f2f2f2;
-    /* 添加背景色 */
-    border-radius: 5px;
-    /* 添加圆角 */
-}
-
-.status-item {
-
-    display: flex;
-    flex-direction: column;
-    /* 添加此行使元素竖直排列 */
-    align-items: center;
-    /* 垂直居中对齐 */
-    justify-content: space-between;
-    /* 水平分布 */
-    width: 100%;
-    /* 设置宽度 */
-}
-
-.tags {
-    padding-bottom: 5px;
-    font-size: 12px;
-    color: #333;
-    /* 设置字体颜色 */
-    box-sizing: border-box;
-    /* 添加此行 */
-}
-
-.status {
-    width: 100%;
-    /* 添加此行使元素宽度填充其父元素 */
-    padding: 5px 10px;
-    background-color: #4CAF50;
-    color: #fff;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    text-align: center;
-    /* 文本居中对齐 */
-}
-
-
-.status:hover {
-    background-color: #45a049;
-    /* 添加鼠标悬停效果 */
-}
-
-
-#side-menu {
-    background-color: #f8f8f8;
-}
-
-
 #body-wrap {
     width: auto;
     height: auto;
@@ -75,16 +17,12 @@
     color: gray;
     border: none;
     cursor: pointer;
+    /* 设置列数 */
+    column-count: 1;
+    /* 设置列与列之间的间隙 */
+    column-gap: 10px;
 }
 
-#input-panel {
-    width: 240px;
-    height: auto;
-    padding: 20px;
-    border-radius: 5px;
-    flex-shrink: 0;
-    /* 添加这一行 */
-}
 
 .img-wrap {
     display: block;
@@ -94,39 +32,8 @@
     height: auto;
     margin-left: 0;
     padding: 2%;
-}
-
-
-#input-panel input {
-    width: 90%;
-    padding: 10px;
+    /* 防止元素跨列显示 */
+    break-inside: avoid;
+    /* 设置元素与元素之间的间隙 */
     margin-bottom: 10px;
-    border-radius: 3px;
-    border: 1px solid #ccc;
-}
-
-#input-panel button {
-    width: 90%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 3px;
-    color: gainsboro;
-    border: none;
-    cursor: pointer;
-}
-
-[name='red'] {
-    background-color: #ff4466;
-}
-
-[name='red']:hover {
-    background-color: #f44336;
-}
-
-[name='blue'] {
-    background-color: #3c9aff;
-}
-
-[name='blue']:hover {
-    background-color: #007BFF;
 }

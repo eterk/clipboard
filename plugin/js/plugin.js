@@ -100,8 +100,8 @@ class ContextElement {
 		img.src = this.src;
 		img.id = this.name;
 		img.className = 'cap-img';
-
 		wrap.appendChild(img)
+
 		this.html = wrap
 	}
 
@@ -112,6 +112,7 @@ class Container {
 	constructor() {
 		this.seq = [];
 	}
+
 
 	length() {
 		return this.seq.length
@@ -163,7 +164,9 @@ function resloveText(buffer) {
 	}
 }
 
+
 let scaleSize = 1;
+
 let switchDict = {
 	"prodMode": true,
 	"clearAfterSave": true,
@@ -214,7 +217,7 @@ function updateWindowSize() {
 
 	let picSize = (pictures.offsetHeight * scaleSize)
 
-	bodyWrap.style.height = Math.max(picSize + 120, 500) + 'px';
+	bodyWrap.style.height = Math.max(picSize + 10, 550) + 'px';
 }
 function getPicSize() {
 	const pictures = getPicsDiv()
@@ -229,7 +232,9 @@ function getPicSize() {
  */
 function buttonUpdate() {
 	hiddenClassElement('need-pic', picturesEmpty());
+	dragAble();
 	updateWindowSize();
+
 	// todo  暂时关闭以下按钮,没开发好逻辑,尚有欠缺
 	// selectEmpty()
 	// 	.then(hidden => hiddenClassElement('need-select', hidden))
@@ -249,7 +254,7 @@ async function getLabeledImages(items) {
 	let arr = await Promise.all(items.map(async item => {
 		return {
 			id: item.id,
-			name:item.id,
+			name: item.id,
 			path: item.filePath,
 			annotation: item.annotation,
 			tags: item.tags,
@@ -260,6 +265,37 @@ async function getLabeledImages(items) {
 	return arr;
 }
 
+function dragAble() {
+	// 获取所有的 .img-wrap 元素
+	var imgWraps = document.querySelectorAll('.img-wrap');
+
+	// 遍历所有的 .img-wrap 元素
+	for (var i = 0; i < imgWraps.length; i++) {
+		var imgWrap = imgWraps[i];
+
+		// 设置 draggable 属性
+		imgWrap.draggable = true;
+
+		// 监听 dragstart 事件
+		imgWrap.addEventListener('dragstart', function (e) {
+			e.dataTransfer.setData('text/plain', e.target.id);
+		});
+
+		// 监听 dragover 事件
+		imgWrap.addEventListener('dragover', function (e) {
+			e.preventDefault();
+		});
+
+		// 监听 drop 事件
+		imgWrap.addEventListener('drop', function (e) {
+			e.preventDefault();
+			var draggedId = e.dataTransfer.getData('text/plain');
+			var draggedEl = document.getElementById(draggedId);
+			e.target.parentNode.insertBefore(draggedEl, e.target.nextSibling);
+		});
+	}
+
+}
 
 
 
@@ -331,6 +367,46 @@ function getInputElements(id, tagName) {
 
 	return inputPanel.getElementsByTagName(tagName);
 }
+function createSliderBar(parentEle, label, min, max, step, value, func) {
+	const sliderBar = document.createElement('div');
+	sliderBar.classList.add('slider-bar');
+
+	const sliderLabel = document.createElement('div');
+	sliderLabel.classList.add('slider-label');
+	sliderLabel.style.width = '25%';
+	sliderLabel.innerText = label + ":";
+	sliderBar.appendChild(sliderLabel);
+
+	const sliderInput = document.createElement('input');
+	sliderInput.setAttribute('type', 'range');
+	sliderInput.setAttribute('min', min);
+	sliderInput.setAttribute('max', max);
+	sliderInput.setAttribute('step', step);
+	sliderInput.setAttribute('value', value);
+
+	sliderInput.classList.add('slider-input');
+	sliderInput.style.width = '60%';
+	sliderBar.appendChild(sliderInput);
+
+	const sliderValue = document.createElement('div');
+	sliderValue.classList.add('slider-value');
+	sliderValue.style.width = '15%';
+	sliderValue.textContent = sliderInput.value;
+	sliderBar.appendChild(sliderValue);
+
+	let firstChild = parentEle.firstChild;
+
+	parentEle.insertBefore(sliderBar, firstChild);
+
+	console.log(sliderBar);
+
+
+	sliderInput.addEventListener('input', function (event) {
+		sliderValue.textContent = sliderInput.value;
+		func(event)
+	});
+}
+
 function hiddenClassElement(className, hidden) {
 	// 获取 class 为 a 的所有元素
 	var elements = document.getElementsByClassName(className);
@@ -441,6 +517,8 @@ eagle.onPluginCreate((plugin) => {
 	hiddenClassElement("need-select", switchDict['prodMode']);
 	eagle.window.hide()
 });
+
+
 
 eagle.onPluginRun(() => {
 	// eagle.window.hide()
