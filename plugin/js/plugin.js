@@ -5,8 +5,7 @@
 const path = require('path');
 
 // ocr 工具模块
-// const { createWorker } = require('tesseract.js'); //这个依赖多线程版本
-const { createWorker } = require('tesseract.js/dist/tesseract.min.js');
+
 const fs = require('fs');
 const { exec } = require('child_process');
 
@@ -81,7 +80,7 @@ class ContextElement {
 	updateState() {
 		switch (this.contextType) {
 			case 'nativeImage':
-				resloveText(this.context.toPNG({}))
+				resolveText(this.context.toPNG({}))
 					.then(txt => {
 						this.text = removeExtraSpaces(txt);
 						this.state = 1;
@@ -154,15 +153,17 @@ let container = new Container();
 /**********************************************
  *                  state                     *
  **********************************************/
-function resloveText(buffer) {
+async function resolveText(buffer) {
 	if (switchDict['ocrSwitch']) {
-		return recognizeTextFromBuffer(buffer);
-	} else {
-		return new Promise((resolve, reject) => {
-			resolve('');
-		});
+		try {
+			return await recognizeTextFromBuffer(buffer);
+		} catch (err) {
+			console.log("ocr 执行失败,返回空字符串");
+		}
 	}
+	return '';
 }
+
 
 
 let scaleSize = 1;
@@ -170,12 +171,15 @@ let scaleSize = 1;
 let switchDict = {
 	"prodMode": true,
 	"clearAfterSave": true,
-	"ocrSwitch": true,
+	"ocrSwitch": false,
 	"initMark": true
 }
 
 function pushSwitch(id) {
 	switchDict[id] = !switchDict[id]
+	updateSwitchButton(id)
+}
+function updateSwitchButton(id) {
 
 	let value = switchDict[id]
 
@@ -398,9 +402,6 @@ function createSliderBar(parentEle, label, min, max, step, value, func) {
 
 	parentEle.insertBefore(sliderBar, firstChild);
 
-	console.log(sliderBar);
-
-
 	sliderInput.addEventListener('input', function (event) {
 		sliderValue.textContent = sliderInput.value;
 		func(event)
@@ -418,6 +419,8 @@ function hiddenClassElement(className, hidden) {
 }
 // 将OCR操作封装成一个函数
 async function recognizeTextFromBuffer(buffer) {
+	// const { createWorker } = require('tesseract.js'); //这个依赖多线程版本
+	const { createWorker } = require('tesseract.js/dist/tesseract.min.js');
 	const worker = await createWorker(['eng', 'chi_sim'])
 	const { data: { text } } = await worker.recognize(buffer); // 直接传递Buffer
 	await worker.terminate();

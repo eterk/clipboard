@@ -19,7 +19,7 @@
                 <div id="status-bar">
                     <div class="status-item">
                         <div class="tags">OCR</div>
-                        <div class="status" onclick="pushSwitch('ocrSwitch')" id="ocrSwitch">开启</div>
+                        <div class="status" onclick="pushSwitch('ocrSwitch')" id="ocrSwitch"></div>
                     </div>
                     <!-- <div class="status-item">
                         <div class="tags">生产模式</div>
@@ -27,7 +27,7 @@
                     </div> -->
                     <div class="status-item">
                         <div class="tags">保存后清除</div>
-                        <div class="status" onclick="pushSwitch('clearAfterSave')" id="clearAfterSave">开启</div>
+                        <div class="status" onclick="pushSwitch('clearAfterSave')" id="clearAfterSave"></div>
                     </div>
                     <div class="status-item">
                         <div class="tags">打印状态</div>
@@ -60,6 +60,9 @@
 
     let columnNum = 1;
     window.onload = function () {
+
+        updateSwitchButton('clearAfterSave');
+        updateSwitchButton('ocrSwitch');
         const parentElement = document.getElementById('input-panel');
 
         createSliderBar(parentElement, '缩  放', 0.1, 2, 0.1, 1, function (event) {
