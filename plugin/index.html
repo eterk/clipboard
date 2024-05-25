@@ -29,10 +29,10 @@
                         <div class="tags">保存后清除</div>
                         <div class="status" onclick="pushSwitch('clearAfterSave')" id="clearAfterSave"></div>
                     </div>
-                    <div class="status-item">
+                    <!-- <div class="status-item">
                         <div class="tags">打印状态</div>
                         <div class="status" onclick="logState()">确定</div>
-                    </div>
+                    </div> -->
                 </div>
                 <div id="input-panel">
                     <input type="text" name="name" placeholder="文件名"><br>
@@ -89,7 +89,7 @@
         .addEventListener('dblclick', function (e) {
             if (e.target.tagName === 'IMG') { // 检查事件的目标元素是否是img
                 container.removeByName(e.target.id);
-                e.target.remove();
+                e.target.parentNode.remove();
                 buttonUpdate();
             }
         });
