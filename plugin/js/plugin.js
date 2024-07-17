@@ -171,7 +171,7 @@ let scaleSize = 1;
 let switchDict = {
 	"prodMode": true,
 	"clearAfterSave": true,
-	"ocrSwitch": false,
+	"ocrSwitch": true,
 	"initMark": true
 }
 
